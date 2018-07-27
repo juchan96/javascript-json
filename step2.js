@@ -19,6 +19,30 @@ class ArrayParser {
     return this.parseData(result);
   }
   //분석한 데이터를 반환해주는 함수
+  // parseData(splitData) {
+  //   let isTrue = true;
+  //   let count = 0;
+  //   for (let n = 0; n < splitData.length; n++) {
+  //     const dataSample = new dataSampleClass();
+  //     if (splitData[n] === "") {
+  //       count++;
+  //       count % 2 === 1 ? isTrue = false : isTrue = true;
+  //       continue;
+  //     }
+  //     else if (splitData[n] !== "") {
+  //       !isNaN(splitData[n]) ? dataSample.item.type = "number" : dataSample.item.type = "not a number";
+  //       dataSample.item.value = splitData[n];
+  //     }
+  //     if (!isTrue) {
+  //       const dataSample1 = new dataSampleClass();
+  //       dataSample1.item.type = "array"
+  //       dataSample1.item.value = "ArrayObject"
+  //       dataSample1.item.child.push(dataSample.item);
+  //       this.item.child.push(dataSample1.item)
+  //     } else this.item.child.push(dataSample.item);
+  //   }
+  //   return this.item;
+  // }
   parseData(splitData) {
     let isTrue = true;
     let count = 0;
@@ -43,6 +67,7 @@ class ArrayParser {
     }
     return this.item;
   }
+
 }
 
 class dataSampleClass {

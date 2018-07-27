@@ -1,5 +1,24 @@
 # javascript-json
-- ## 요구사항
+
+
+
+## 학습 키워드
+
+- for...of 와 for...in의 차이점
+
+  - `for...in` 루프는 객체의 모든 열거가능한 속성에 대해 반복합니다.
+
+    `for...of` 구문은 **컬렉션** 전용입니다, 모든 객체보다는. `[Symbol.iterator]` 속성이 있는 모든 컬렉션 요소에 대해 이 방식으로 반복합니다.
+
+    for each...in - 비슷한 문이지만, 속성 이름 자체보다는 객체의 속성값을 반복합니다 (사라짐).
+
+     
+
+
+
+
+
+- ## step1. 요구사항
 
   - ArrayParser함수를 만든다.
   - 배열안에는 숫자데이터만 존재한다.
@@ -40,7 +59,24 @@
 
 
 
-## keyword
+## step2. 요구사항
 
-token이 뭘까? 
+- 배열안에 배열이 있는 경우도 분석한다.
+  - var s = "[123,[22],33]";
 
+- 중첩된 배열 원소도 역시, 숫자데이터만 존재한다. 
+- 중첩된 결과는 child 부분에 추가해서 결과가 표현돼야 한다.
+
+
+
+## 실행결과
+
+```
+var str = var s = "[123,[22],33,[1,2,3,4,5]]";
+var result = ArrayParser(str);
+console.log(JSON.stringify(result, null, 2));
+//배열안의 배열 같은경우, 다음과 같이 표현될 수 있다(예시)
+     { type: 'array', value: ArrayObject, child: [{type:'number', value:22, child:[]}] }
+```
+
+ 
