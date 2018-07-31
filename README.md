@@ -79,4 +79,65 @@ console.log(JSON.stringify(result, null, 2));
      { type: 'array', value: ArrayObject, child: [{type:'number', value:22, child:[]}] }
 ```
 
- 
+
+
+## step3. 요구사항
+
+- 무한중첩 구조도 동작하게 한다. [[[[[]]]]]
+- 배열의 원소에는 숫자타입만 존재한다.
+- 복잡한 세부로직은 함수로 분리해본다.
+- 중복된 코드역시 함수로 분리해서 일반화한다.
+- **프로그래밍 설계를 같이 PR한다.**
+- hint : 중첩문제를 풀기 위해 stack구조를 활용해서 구현할 수도 있다. 
+
+## 실행결과
+
+```
+var str = "[123,[22,23,[11,[112233],112],55],33]";
+var result = ArrayParser(str);
+console.log(JSON.stringify(result, null, 2)); 
+
+//중첩된 배열을 분석했음으로, 결과 역시 중첩된 객체형태이다.
+```
+
+
+
+## step3. 설계
+
+- str을 token단위로 분석하기
+
+  ```
+  str = [123,[22,23[11,112],55],33,]
+  for (let n = 0; n < str.length; n++) {
+        !isNaN(str[n]) ? tokenizeStr += str[n]
+        : str[n] === "[" ? tokenizeStr += str[n] + ","
+        : str[n] === "]" ? tokenizeStr += "," + str[n]
+        : tokenizeStr += ",";
+      }
+      // 실행 결과: [,123,[,22,23,[,11,112,],55,],33,]
+  ```
+
+
+
+- 분석한 결과를 배열에 담기 split()메소드 사용
+
+  ```
+  let result = tokenizeStr.split(",")
+  result.shift();
+  result.pop();
+  return this.parseData(result);
+  // 실행 결과: ['123','[','22','23','[','11','112',']','55',']','33']
+  ```
+
+- "["라는 문자가 나올때마다 child:[] 배열안에 data를 기록한다.(중첩시키기)
+
+- "]"라는 문자가 나오면, 한단계식 중첩을 없애고 data를 기록한다
+
+- 배열을 중첩시키려면 어떻게 해야할까?
+
+  - 배열을 인자로 받고, 
+  - 빈 배열(arr)을 생성한다.
+  - 빈 배열(arr)안에 인자로 받은 배열을 담는다(push메서드)
+  - 자신을 호출하는 함수에 arr를 인자로 받고, 새로 복사한 배열에 담는다.(concat메서드, 재귀)
+
+- 

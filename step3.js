@@ -9,13 +9,16 @@ class ArrayParser {
   splitData(str) {
     let tokenizeStr = "";
     for (let n = 0; n < str.length; n++) {
-      if (!isNaN(str[n])) {
-        tokenizeStr += str[n];
-      } else tokenizeStr += ",";
+      !isNaN(str[n]) ? tokenizeStr += str[n]
+        : str[n] === "[" ? tokenizeStr += str[n] + ","
+        : str[n] === "]" ? tokenizeStr += "," + str[n]
+        : tokenizeStr += ",";
     }
+    console.log(tokenizeStr)
     let result = tokenizeStr.split(",")
     result.shift();
     result.pop();
+    console.log(result)
     return this.parseData(result);
   }
   //분석한 데이터를 반환해주는 함수
