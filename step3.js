@@ -6,15 +6,14 @@ class ArrayParser {
     }
   }
   //문자를 쪼개서, 숫자만 따로 배열에 저장해서 반환하는 함수
-  splitData(str) {
+  splitStringData(str) {
     let tokenizeStr = "";
     for (let n = 0; n < str.length; n++) {
       !isNaN(str[n]) ? tokenizeStr += str[n]
         : str[n] === "[" ? tokenizeStr += str[n] + ","
-        : str[n] === "]" ? tokenizeStr += "," + str[n]
-        : tokenizeStr += ",";
+          : str[n] === "]" ? tokenizeStr += "," + str[n]
+            : tokenizeStr += ",";
     }
-    console.log(tokenizeStr)
     let result = tokenizeStr.split(",")
     result.shift();
     result.pop();
@@ -22,44 +21,67 @@ class ArrayParser {
     return this.parseData(result);
   }
   //분석한 데이터를 반환해주는 함수
-  //중첩된 배열에서 '[' 괄호가 나오면 count를해서 isTrue에 false또는 true를 대입한다.
-  //isTrue가 false = 중첩된 배열 이라는 뜻, 그 배열은 새로운 객체에 담는다.
-  parseData(splitData) {
-    let isTrue = true;
+  parseData(splitStringData) {
     let count = 0;
-    for (let value of splitData) {
-      const dataSample = new dataSampleClass();
-      if (value === "") {
-        count++;
-        count % 2 === 1 ? isTrue = false : isTrue = true;
+    let prevDataSample = this.item.child;
+    for (let value of splitStringData) {
+      debugger;
+      switch (value) {
+        case "[":
+          count++;
+          var childArr = this.getChildArr(prevDataSample, count);
+          continue;
+        case "]":
+          count--;
+          continue;
+        default:
+          var dataSample = new dataSampleClass();
+          var pileDataSample = this.inputData(dataSample, value);
+      }
+      if (count > 0) {
+        prevDataSample = this.pileData(pileDataSample, childArr, count);
         continue;
       }
-      else if (value !== "") {
-        !isNaN(value) ? dataSample.item.type = "number" : dataSample.item.type = "not a number";
-        dataSample.item.value = value;
-      }
-      if (!isTrue) {
-        const dataSample1 = new dataSampleClass();
-        dataSample1.item.type = "array";
-        dataSample1.item.value = "ArrayObject";
-        dataSample1.item.child.push(dataSample.item);
-        this.item.child.push(dataSample1.item);
-      } else this.item.child.push(dataSample.item);
+      else this.item.child.push(pileDataSample);
     }
-    return this.item;
+    return this.item.child;
+  }
+
+  inputData(dataSample, value) {
+    dataSample["type"] = "number";
+    dataSample["value"] = value;
+    return dataSample
+  }
+
+  getChildArr(prevDataSample, count) {
+    let pileDataSample = new dataSampleClass();
+    pileDataSample.type = "array";
+    pileDataSample.value = "ArrayObject";
+    if (count > 0) {
+      for (let i = 0; i < prevDataSample.length; i++) {
+        if (prevDataSample[i]["type"] === "array") this.getChildArr(prevDataSample[i]["child"])
+      }
+    }
+    prevDataSample.push(pileDataSample);
+    return pileDataSample.child;
+  }
+
+  pileData(pileDataSample, childArr, count) {
+    childArr.push(pileDataSample);
+    return childArr;
   }
 }
+//토큰별로 나눈 string의 type과 value를 입력해주는 함수.
 
 class dataSampleClass {
   constructor() {
-    this.item = {
-      type: "",
-      value: "",
-      child: []
-    }
+    this.type = "",
+      this.value = "",
+      this.child = []
   }
 }
 
 const parseStr = new ArrayParser();
-console.log(parseStr.splitData("[123,[22],33]"));
-// console.log(parseStr.splitData("[123,[22],33,[1,2,3,4,5]]"));
+// console.log(JSON.stringify(parseStr.splitStringData("[123,[22,23,[11,112],55],33]"), null, 2)); 
+console.log(JSON.stringify(parseStr.splitStringData("[123,[22,23,[11,112],55],33]"), null, 2));
+// console.log(JSON.stringify(parseStr.splitStringData("[1,[2,5,[3]],4]"), null, 2));
