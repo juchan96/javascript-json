@@ -10,9 +10,9 @@ class ArrayParser {
     let tokenizeStr = "";
     for (let n = 0; n < str.length; n++) {
       !isNaN(str[n]) ? tokenizeStr += str[n]
-        : str[n] === "[" ? tokenizeStr += str[n] + ","
-          : str[n] === "]" ? tokenizeStr += "," + str[n]
-            : tokenizeStr += ",";
+      : str[n] === "[" ? tokenizeStr += str[n] + ","
+      : str[n] === "]" ? tokenizeStr += "," + str[n]
+      : tokenizeStr += ",";
     }
     let result = tokenizeStr.split(",")
     result.shift();
@@ -22,56 +22,75 @@ class ArrayParser {
   }
   //분석한 데이터를 반환해주는 함수
   parseData(splitStringData) {
+    let sum = 0;
     let count = 0;
-    let prevDataSample = this.item.child;
+    let prevDataSample = this.item;
+    let noNameData = false;
     for (let value of splitStringData) {
       debugger;
+      noNameData = noNameData || prevDataSample.child
       switch (value) {
         case "[":
           count++;
-          var childArr = this.getChildArr(prevDataSample, count);
+          var childArr = this.getChildArr();
+          noNameData.push(childArr);
+          noNameData = this.excapePileData(prevDataSample.child);
           continue;
         case "]":
-          count--;
+          count--
+          noNameData = this.fn(prevDataSample.child, count, sum)
           continue;
         default:
-          var dataSample = new dataSampleClass();
-          var pileDataSample = this.inputData(dataSample, value);
+          var inputDat = this.inputData(value);
+        // this.item.child.push(inputDat);
       }
       if (count > 0) {
-        prevDataSample = this.pileData(pileDataSample, childArr, count);
+        noNameData.push(inputDat)
         continue;
+      } else {
+        this.item.child.push(inputDat);
       }
-      else this.item.child.push(pileDataSample);
     }
     return this.item.child;
   }
 
-  inputData(dataSample, value) {
+  inputData(value) {
+    var dataSample = new dataSampleClass();
     dataSample["type"] = "number";
     dataSample["value"] = value;
     return dataSample
   }
 
-  getChildArr(prevDataSample, count) {
-    let pileDataSample = new dataSampleClass();
-    pileDataSample.type = "array";
-    pileDataSample.value = "ArrayObject";
-    if (count > 0) {
-      for (let i = 0; i < prevDataSample.length; i++) {
-        if (prevDataSample[i]["type"] === "array") this.getChildArr(prevDataSample[i]["child"])
-      }
-    }
-    prevDataSample.push(pileDataSample);
-    return pileDataSample.child;
+  getChildArr() {
+    let inputDat = new dataSampleClass();
+    inputDat.type = "array";
+    inputDat.value = "ArrayObject";
+    return inputDat;
   }
 
-  pileData(pileDataSample, childArr, count) {
-    childArr.push(pileDataSample);
-    return childArr;
+  excapePileData(prevDataSample) {
+    for (let index = 0; index < prevDataSample.length; index++) {
+      let element = prevDataSample[index];
+      if (element["type"] === "array") {
+        return this.excapePileData(prevDataSample[index]["child"])
+      }
+    }
+    return prevDataSample;
   }
+
+  fn(prevDataSample, count, sum) {
+    for (let i = 0; i < prevDataSample.length; i++) {
+      let element = prevDataSample[i];
+      if (element["type"] === "array" && sum !== count) {
+        sum++;
+        return this.fn(prevDataSample[i]["child"], count, sum)
+      }
+    }
+    return prevDataSample;
+  }
+
 }
-//토큰별로 나눈 string의 type과 value를 입력해주는 함수.
+// 토큰별로 나눈 string의 type과 value를 입력해주는 함수.
 
 class dataSampleClass {
   constructor() {
@@ -83,5 +102,5 @@ class dataSampleClass {
 
 const parseStr = new ArrayParser();
 // console.log(JSON.stringify(parseStr.splitStringData("[123,[22,23,[11,112],55],33]"), null, 2)); 
-console.log(JSON.stringify(parseStr.splitStringData("[123,[22,23,[11,112],55],33]"), null, 2));
-// console.log(JSON.stringify(parseStr.splitStringData("[1,[2,5,[3]],4]"), null, 2));
+// console.log(JSON.stringify(parseStr.splitStringData("[123,[22,23,[11,112],55],33]"), null, 2));
+console.log(JSON.stringify(parseStr.splitStringData("[1,[2,[3,4,[10,12],60],5,6],7]"), null, 2));
