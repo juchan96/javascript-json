@@ -3,7 +3,9 @@ class ArrayParser {
     this.item = {
       type: "array",
       child: []
-    }
+    };
+    this.count = 0;
+    this.sum = 0;
   }
   //문자를 쪼개서, 숫자만 따로 배열에 저장해서 반환하는 함수
   splitStringData(str) {
@@ -14,56 +16,64 @@ class ArrayParser {
       : str[n] === "]" ? tokenizeStr += "," + str[n]
       : tokenizeStr += ",";
     }
-    let result = tokenizeStr.split(",")
+    let result = tokenizeStr.split(",");
     result.shift();
     result.pop();
     console.log(result)
     return this.parseData(result);
   }
-  //분석한 데이터를 반환해주는 함수
+  //분석한 숫자 타입 데이터를 파싱하여, 객체로 반환해주는 함수
   parseData(splitStringData) {
-    const sum = 0;
-    let count = 0;
+    let newNumTypeObj;
     const ArrayParserItem = this.item.child;
     let lastChildArr = ArrayParserItem;
+
     for (let value of splitStringData) {
-      debugger;
-      switch (value) {
-        case "[":
-          count++;
-          var newArrTypeObj = this.addNewObjThatTypeIsArr();
-          lastChildArr.push(newArrTypeObj);
-          lastChildArr = this.overlapChild(ArrayParserItem);
-          continue;
-        case "]":
-          count--;
-          lastChildArr = this.excapeChild(ArrayParserItem, count, sum);
-          continue;
-        default:
-          var NewNumTypeObj = this.addNewObjThatTypeIsNum(value);
-      }
-      if (count > 0) {
-        lastChildArr.push(NewNumTypeObj);
+      if (!isNaN(value)) {
+        newNumTypeObj = this.addNewObjThatTypeIsNum(value);
+      } else {
+        lastChildArr = this.getLastChildArr(lastChildArr, value, ArrayParserItem);
         continue;
-      } else ArrayParserItem.push(NewNumTypeObj);
+      }
+
+      if (this.count > 0) {
+        lastChildArr.push(newNumTypeObj);
+        continue;
+      } else ArrayParserItem.push(newNumTypeObj);
     }
     return ArrayParserItem;
   }
-
+//val가 숫자일 때, 그 숫자에 대한 데이터(type,value)를 새로운 객체에 입력한다.그리고, 그 객체를 반환한다.
   addNewObjThatTypeIsNum(value) {
     var NewNumTypeObj = new dataSampleClass();
     NewNumTypeObj["type"] = "number";
     NewNumTypeObj["value"] = value;
     return NewNumTypeObj;
   }
-
-  addNewObjThatTypeIsArr() {
-    let NewArrTypeObj = new dataSampleClass();
-    NewArrTypeObj.type = "array";
-    NewArrTypeObj.value = "ArrayObject";
-    return NewArrTypeObj;
+//val가 "[" 일때 마지막 child배열을, "]"일 때에는 마지막에서 2번째 child배열을 반환해주는 함수.
+  getLastChildArr(lastChildArr, value, ArrayParserItem) {
+    switch (value) {
+      case "[":
+        this.count++;
+        var newArrType = this.addNewObjThatTypeIsArr();
+        lastChildArr.push(newArrType);
+        lastChildArr = this.overlapChild(ArrayParserItem);
+        break;
+      case "]":
+        this.count--;
+        lastChildArr = this.excapeChild(ArrayParserItem);
+        break;
+    }
+    return lastChildArr;
   }
-
+//val가 "[" 또는 "]"일 때, 새로운 객체를 생성하여 type(array)과 value(arrayObject)를 입력한다. 그리고, 그 객체를 반환한다.
+  addNewObjThatTypeIsArr() {
+    let NewArrType = new dataSampleClass();
+    NewArrType.type = "array";
+    NewArrType.value = "ArrayObject";
+    return NewArrType;
+  }
+//lastchild를 찾아가는 함수.
   overlapChild(ArrayParserItem) {
     for (let index = 0; index < ArrayParserItem.length; index++) {
       if (ArrayParserItem[index]["type"] === "array") {
@@ -72,20 +82,19 @@ class ArrayParser {
     }
     return ArrayParserItem;
   }
-
-  excapeChild(ArrayParserItem, count, sum) {
+//lastchild의 전 단계(마지막 child에서 2번째 child)를 찾아가는 함수.
+  excapeChild(ArrayParserItem) {
     for (let index = 0; index < ArrayParserItem.length; index++) {
-      if (ArrayParserItem[index]["type"] === "array" && sum !== count) {
-        sum++;
-        return this.excapeChild(ArrayParserItem[index]["child"], count, sum);
+      if (ArrayParserItem[index]["type"] === "array" && this.sum !== this.count) {
+        this.sum++;
+        return this.excapeChild(ArrayParserItem[index]["child"]);
       }
     }
     return ArrayParserItem;
   }
-
 }
-// 토큰별로 나눈 string의 type과 value를 입력해주는 함수.
 
+// 토큰별로 나눈 string의 type과 value를 입력해주는 함수.
 class dataSampleClass {
   constructor() {
     this.type = "",
@@ -95,8 +104,7 @@ class dataSampleClass {
 }
 
 const parseStr = new ArrayParser();
-// console.log(JSON.stringify(parseStr.splitStringData("[123,[22,23,[11,112],55],33]"), null, 2)); 
-// console.log(JSON.stringify(parseStr.splitStringData("[123,[22,23,[11,112],55],33]"), null, 2));
 const testcase1 = "[1,[2,[3,4,[10,12],60],5,6],7]";
 const testcase2 = "[[[[[]]]]]"
-console.log(JSON.stringify(parseStr.splitStringData(testcase1), null, 2));
+const testcase3 = "[123,[22,23,[11,112],55],33]"
+console.log(JSON.stringify(parseStr.splitStringData(testcase3), null, 2));
