@@ -104,49 +104,65 @@ console.log(JSON.stringify(result, null, 2));
 
 ## step3. 설계
 
-- str을 token단위로 분석하기
+- str = "[1,[2,[3],4],5]"
 
-  ```
-  str = [123,[22,23[11,112],55],33,]
-  for (let n = 0; n < str.length; n++) {
-        !isNaN(str[n]) ? tokenizeStr += str[n]
-        : str[n] === "[" ? tokenizeStr += str[n] + ","
-        : str[n] === "]" ? tokenizeStr += "," + str[n]
-        : tokenizeStr += ",";
-      }
-      // 실행 결과: [,123,[,22,23,[,11,112,],55,],33,]
-  ```
+- 토큰별로 나누는 함수 생성 => 배열안에 다시 담는다 // ["1", "[", "2", "]", "[", "3", "]", "4", "]", "5"]
 
+- 반복문을 통해 각 토큰에 접근 한다.
 
+  1. 만약 숫자이면, 새로운 객체 타입을 만들어 숫자 데이터를 객체 안에 담는다.
 
-- 분석한 결과를 배열에 담기 split()메소드 사용
+     ```
+     type: number,
+     value: 1,
+     child: []
+     ```
 
-  ```
-  let result = tokenizeStr.split(",")
-  result.shift();
-  result.pop();
-  return this.parseData(result);
-  // 실행 결과: ['123','[','22','23','[','11','112',']','55',']','33']
-  ```
-  
+     - 숫자 데이터가 담긴 데이터를 lastChild안에 담는다.
 
-- splitData를 통해 토큰화시킨 string이 문자인지 숫자인지 구분한다.
+     ```
+     type: array,
+     value: arrayObject,
+     child: [
+         type: number,
+     	value: 1,
+     	child: []
+     ]
+     ```
 
-  - 문자일 경우
-    - "["라는 문자가 나올 때 count값에 "1"을 더한다.
-    - "]"라는 문자가 나오면, count값에 "1"을 뺀다.
-  - 숫자일 경우
-    - 객체를 새로 만들어, type과 valuer값을 입력시켜주는 함수를 생성한다.
+  2. 만약 "["가 나오면, 새로운 객체 타입을 만들어 배열 데이터를 객체 안에 담는다.
 
-- count가 세어지면 객체를 중첩시켜주는 함수를 생성한다.
+     ```
+     type: array,
+     value: arrayObject,
+     child: []
+     ```
 
-  - 배열을 인자로 받고, 
-  - 빈 배열(arr)을 생성한다.
-  - 빈 배열(arr)안에 인자로 받은 배열을 담는다(push메서드)
-  - 자신을 호출하는 함수에 arr를 인자로 받고, 새로 복사한 배열에 담는다.(concat메서드, 재귀)
+  3. 재귀를 통해서 lastChild에 접근하고 객체를 lastChild안에 담는다.
 
-- dataSample안에 type와 value에 값을 대입시킨다.
+     ```
+     type: array,
+     value: arrayObject,
+     child: [
+         type: array,
+     	value: arrayObject,
+     	child: []
+     ]
+     ```
 
-- count가 1이상일때 fn 함수를 호출한다.
+  4. 만약 "]"가 나오면 재귀를 통해, 끝에서 2번째 lastChild에 접근한다. (1번으로)
 
-- count의 값 만큼 재귀를 한다.  => 재귀하면서 배열 중첩시키기.
+     ```
+     type: array,
+     value: arrayObject,
+     child: [
+         type: array,
+     	value: arrayObject,
+     	child: [/*not here*/],
+     	// 여기에 접근
+     ]
+     ```
+
+  5. 반복문을 마치면, this.item.child인 arrayParserItem을 반환한다.
+
+     

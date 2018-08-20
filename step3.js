@@ -21,16 +21,13 @@ class ArrayParser {
   }
   //문자를 쪼개서, 숫자만 따로 배열에 저장해서 반환하는 함수
   splitStringData(str) {
-    let tokenizeStr;
+    let tokenizeStr = "";
     for (let index = 0; index < str.length; index++) {
-      !isNaN(str[index]) ? tokenizeStr += str[index]
-      : str[index] === "[" ? tokenizeStr += "[" + ","
+        str[index] === "[" ? tokenizeStr += "[" + ","
       : str[index] === "]" ? tokenizeStr += "," + "]"
-      : tokenizeStr += ",";
+      : tokenizeStr += str[index]
     }
     let result = tokenizeStr.split(",");
-    result.shift();
-    result.pop();
     console.log(result)
     return result;
   }
@@ -42,7 +39,7 @@ class ArrayParser {
     let lastChildArr = ArrayParserItem;
 
     for (let value of splitStringData) {
-      if (!isNaN(value) && value !== "") {
+      if (!isNaN(value)) {
         newNumTypeObj = this.addNewObjThatTypeIsNum(value);
       } else {
         lastChildArr = this.getLastChildArr(lastChildArr, value, ArrayParserItem);
@@ -59,12 +56,9 @@ class ArrayParser {
     NewNumTypeObj["value"] = value;
     return NewNumTypeObj;
   }
-  //ArrayParserItem에 필요한 값들을 추가해주는 함수.
+  //lastChild에 값을 추가해준다.
   getArrParserItemResult(ArrayParserItem, newNumTypeObj, lastChildArr) {
-    if (this.count > 0) {
-      lastChildArr.push(newNumTypeObj);
-    } else ArrayParserItem.push(newNumTypeObj);
-
+    if (newNumTypeObj["value"] !== "") lastChildArr.push(newNumTypeObj);
     return ArrayParserItem;
   }
 
@@ -75,11 +69,12 @@ class ArrayParser {
         this.count++;
         const newArrType = this.addNewObjThatTypeIsArr();
         lastChildArr.push(newArrType);
-        lastChildArr = this.overlapChild(ArrayParserItem);
+        lastChildArr = this.findLastChild(ArrayParserItem);
         break;
       case "]":
+        this.sum = 0;
         this.count--;
-        lastChildArr = this.excapeChild(ArrayParserItem);
+        lastChildArr = this.findSecondLastChild(ArrayParserItem);
         break;
     }
     return lastChildArr;
@@ -92,20 +87,20 @@ class ArrayParser {
     return NewArrType;
   }
   //lastchild를 찾아가는 함수.
-  overlapChild(ArrayParserItem) {
+  findLastChild(ArrayParserItem) {
     for (let index = 0; index < ArrayParserItem.length; index++) {
       if (ArrayParserItem[index]["type"] === "array") {
-        return this.overlapChild(ArrayParserItem[index]["child"]);
+        return this.findLastChild(ArrayParserItem[index]["child"]);
       }
     }
     return ArrayParserItem;
   }
   //lastchild의 전 단계(마지막 child에서 2번째 child)를 찾아가는 함수.
-  excapeChild(ArrayParserItem) {
+  findSecondLastChild(ArrayParserItem) {
     for (let index = 0; index < ArrayParserItem.length; index++) {
       if (ArrayParserItem[index]["type"] === "array" && this.sum !== this.count) {
         this.sum++;
-        return this.excapeChild(ArrayParserItem[index]["child"]);
+        return this.findSecondLastChild(ArrayParserItem[index]["child"]);
       }
     }
     return ArrayParserItem;
@@ -122,8 +117,10 @@ class dataSampleClass {
 }
 
 const parseStr = new ArrayParser();
-const testcase = "[1,[  2]]"
-const testcase1 = "[1,[2,[3,4,[10,12],60],5,6],7]";
-const testcase2 = "[[[[[]]]]]"
-const testcase3 = "[123,[22,23,[11,112],55],33]"
-console.log(JSON.stringify(parseStr.ArrayParser(testcase3), null, 2));
+const testcase = "[1,[2,[3],4],5]";
+const testcase1 = "[1,[         2]]";
+const testcase2 = "[1,[2,[[3,4,[10,12],60],9]],7,8]";
+const testcase3 = "[[[[[],[]]]]]";
+const testcase4 = "[123,[22,23,[11,112],55],33]";
+console.log(JSON.stringify(parseStr.ArrayParser(testcase), null, 2));
+
