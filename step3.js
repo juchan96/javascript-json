@@ -1,4 +1,4 @@
-class ArrayParser {
+class arrayParser {
   constructor() {
     this.item = {
       type: "array",
@@ -8,7 +8,7 @@ class ArrayParser {
     this.sum = 0;
   }
 
-  ArrayParser(str) {
+  getArrayParser(str) {
     const trimBlank = this.getTrimBlank(str);
     const StringData = this.splitStringData(trimBlank);
     const parseData = this.getParseData(StringData);
@@ -27,7 +27,7 @@ class ArrayParser {
       : str[index] === "]" ? tokenizeStr += "," + "]"
       : tokenizeStr += str[index]
     }
-    let result = tokenizeStr.split(",");
+    const result = tokenizeStr.split(",");
     console.log(result)
     return result;
   }
@@ -35,75 +35,75 @@ class ArrayParser {
   getParseData(splitStringData) {
     let result;
     let newNumTypeObj;
-    const ArrayParserItem = this.item.child;
-    let lastChildArr = ArrayParserItem;
+    const arrayParserItem = this.item.child;
+    let lastChildArr = arrayParserItem;
 
     for (let value of splitStringData) {
       if (!isNaN(value)) {
         newNumTypeObj = this.addNewObjThatTypeIsNum(value);
       } else {
-        lastChildArr = this.getLastChildArr(lastChildArr, value, ArrayParserItem);
+        lastChildArr = this.getLastChildArr(lastChildArr, value, arrayParserItem);
         continue;
       }
-      result = this.getArrParserItemResult(ArrayParserItem, newNumTypeObj, lastChildArr)
+      result = this.getArrParserItemResult(arrayParserItem, newNumTypeObj, lastChildArr)
     }
     return result;
   }
   //val가 숫자일 때, 그 숫자에 대한 데이터(type,value)를 새로운 객체에 입력한다.그리고, 그 객체를 반환한다.
   addNewObjThatTypeIsNum(value) {
-    var NewNumTypeObj = new dataSampleClass();
-    NewNumTypeObj["type"] = "number";
-    NewNumTypeObj["value"] = value;
-    return NewNumTypeObj;
+    const newNumTypeObj = new dataSampleClass();
+    newNumTypeObj["type"] = "number";
+    newNumTypeObj["value"] = value;
+    return newNumTypeObj;
   }
   //lastChild에 값을 추가해준다.
-  getArrParserItemResult(ArrayParserItem, newNumTypeObj, lastChildArr) {
+  getArrParserItemResult(arrayParserItem, newNumTypeObj, lastChildArr) {
     if (newNumTypeObj["value"] !== "") lastChildArr.push(newNumTypeObj);
-    return ArrayParserItem;
+    return arrayParserItem;
   }
 
   //val가 "[" 일때 마지막 child배열을, "]"일 때에는 마지막에서 2번째 child배열을 반환해주는 함수.
-  getLastChildArr(lastChildArr, value, ArrayParserItem) {
+  getLastChildArr(lastChildArr, value, arrayParserItem) {
     switch (value) {
       case "[":
         this.count++;
         const newArrType = this.addNewObjThatTypeIsArr();
         lastChildArr.push(newArrType);
-        lastChildArr = this.findLastChild(ArrayParserItem);
+        lastChildArr = this.findLastChild(arrayParserItem);
         break;
       case "]":
         this.sum = 0;
         this.count--;
-        lastChildArr = this.findSecondLastChild(ArrayParserItem);
+        lastChildArr = this.findSecondLastChild(arrayParserItem);
         break;
     }
     return lastChildArr;
   }
   //val가 "[" 또는 "]"일 때, 새로운 객체를 생성하여 type(array)과 value(arrayObject)를 입력한다. 그리고, 그 객체를 반환한다.
   addNewObjThatTypeIsArr() {
-    let NewArrType = new dataSampleClass();
-    NewArrType.type = "array";
-    NewArrType.value = "ArrayObject";
-    return NewArrType;
+    const newArrType = new dataSampleClass();
+    newArrType.type = "array";
+    newArrType.value = "ArrayObject";
+    return newArrType;
   }
   //lastchild를 찾아가는 함수.
-  findLastChild(ArrayParserItem) {
-    for (let index = 0; index < ArrayParserItem.length; index++) {
-      if (ArrayParserItem[index]["type"] === "array") {
-        return this.findLastChild(ArrayParserItem[index]["child"]);
+  findLastChild(arrayParserItem) {
+    for (let index = 0; index < arrayParserItem.length; index++) {
+      if (arrayParserItem[index]["type"] === "array") {
+        return this.findLastChild(arrayParserItem[index]["child"]);
       }
     }
-    return ArrayParserItem;
+    return arrayParserItem;
   }
   //lastchild의 전 단계(마지막 child에서 2번째 child)를 찾아가는 함수.
-  findSecondLastChild(ArrayParserItem) {
-    for (let index = 0; index < ArrayParserItem.length; index++) {
-      if (ArrayParserItem[index]["type"] === "array" && this.sum !== this.count) {
+  findSecondLastChild(arrayParserItem) {
+    for (let index = 0; index < arrayParserItem.length; index++) {
+      if (arrayParserItem[index]["type"] === "array" && this.sum !== this.count) {
         this.sum++;
-        return this.findSecondLastChild(ArrayParserItem[index]["child"]);
+        return this.findSecondLastChild(arrayParserItem[index]["child"]);
       }
     }
-    return ArrayParserItem;
+    return arrayParserItem;
   }
 }
 
@@ -116,11 +116,11 @@ class dataSampleClass {
   }
 }
 
-const parseStr = new ArrayParser();
+const parseStr = new arrayParser();
 const testcase = "[1,[2,[3],4],5]";
 const testcase1 = "[1,[         2]]";
 const testcase2 = "[1,[2,[[3,4,[10,12],60],9]],7,8]";
 const testcase3 = "[[[[[],[]]]]]";
 const testcase4 = "[123,[22,23,[11,112],55],33]";
-console.log(JSON.stringify(parseStr.ArrayParser(testcase), null, 2));
+console.log(JSON.stringify(parseStr.getArrayParser(testcase), null, 2));
 
