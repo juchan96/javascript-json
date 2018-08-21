@@ -22,10 +22,10 @@ class arrayParser {
   //문자를 쪼개서, 숫자만 따로 배열에 저장해서 반환하는 함수
   splitStringData(str) {
     let tokenizeStr = "";
-    for (let index = 0; index < str.length; index++) {
-        str[index] === "[" ? tokenizeStr += "[" + ","
-      : str[index] === "]" ? tokenizeStr += "," + "]"
-      : tokenizeStr += str[index]
+    for (let value of str) {
+      value === "[" ? tokenizeStr += "[" + ","
+      : value === "]" ? tokenizeStr += "," + "]"
+      : tokenizeStr += value
     }
     const result = tokenizeStr.split(",");
     console.log(result)
@@ -84,19 +84,19 @@ class arrayParser {
   }
   //lastchild를 찾아가는 함수.
   findLastChild(arrayParserItem) {
-    for (let index = 0; index < arrayParserItem.length; index++) {
-      if (arrayParserItem[index]["type"] === "array") {
-        return this.findLastChild(arrayParserItem[index]["child"]);
+    for (let value of arrayParserItem) {
+      if (value["type"] === "array") {
+        return this.findLastChild(value["child"]);
       }
     }
     return arrayParserItem;
   }
   //lastchild의 전 단계(마지막 child에서 2번째 child)를 찾아가는 함수.
   findSecondLastChild(arrayParserItem) {
-    for (let index = 0; index < arrayParserItem.length; index++) {
-      if (arrayParserItem[index]["type"] === "array" && this.sum !== this.count) {
+    for (let value of arrayParserItem) {
+      if (value["type"] === "array" && this.sum !== this.count) {
         this.sum++;
-        return this.findSecondLastChild(arrayParserItem[index]["child"]);
+        return this.findSecondLastChild(value["child"]);
       }
     }
     return arrayParserItem;
@@ -108,7 +108,7 @@ class dataSampleClass {
   constructor(type, value) {
     this.type = type,
       this.value = value
-      this.child = []
+    this.child = []
   }
 }
 
@@ -118,5 +118,5 @@ const testcase1 = "[1,[         2]]";
 const testcase2 = "[1,[2,[[3,4,[10,12],60],9]],7,8]";
 const testcase3 = "[[[[[],[]]]]]";
 const testcase4 = "[123,[22,23,[11,112],55],33]";
-console.log(JSON.stringify(parseStr.getArrayParser(testcase3), null, 2));
+console.log(JSON.stringify(parseStr.getArrayParser(testcase1), null, 2));
 
