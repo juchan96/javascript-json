@@ -51,9 +51,7 @@ class arrayParser {
   }
   //val가 숫자일 때, 그 숫자에 대한 데이터(type,value)를 새로운 객체에 입력한다.그리고, 그 객체를 반환한다.
   addNewObjThatTypeIsNum(value) {
-    const newNumTypeObj = new dataSampleClass();
-    newNumTypeObj["type"] = "number";
-    newNumTypeObj["value"] = value;
+    const newNumTypeObj = new dataSampleClass("number", value);
     return newNumTypeObj;
   }
   //lastChild에 값을 추가해준다.
@@ -81,9 +79,7 @@ class arrayParser {
   }
   //val가 "[" 또는 "]"일 때, 새로운 객체를 생성하여 type(array)과 value(arrayObject)를 입력한다. 그리고, 그 객체를 반환한다.
   addNewObjThatTypeIsArr() {
-    const newArrType = new dataSampleClass();
-    newArrType.type = "array";
-    newArrType.value = "ArrayObject";
+    const newArrType = new dataSampleClass("array", "arrayObject");
     return newArrType;
   }
   //lastchild를 찾아가는 함수.
@@ -109,9 +105,9 @@ class arrayParser {
 
 // 토큰별로 나눈 string의 type과 value를 입력해주는 함수.
 class dataSampleClass {
-  constructor() {
-    this.type = "",
-      this.value = "",
+  constructor(type, value) {
+    this.type = type,
+      this.value = value
       this.child = []
   }
 }
@@ -122,5 +118,5 @@ const testcase1 = "[1,[         2]]";
 const testcase2 = "[1,[2,[[3,4,[10,12],60],9]],7,8]";
 const testcase3 = "[[[[[],[]]]]]";
 const testcase4 = "[123,[22,23,[11,112],55],33]";
-console.log(JSON.stringify(parseStr.getArrayParser(testcase), null, 2));
+console.log(JSON.stringify(parseStr.getArrayParser(testcase3), null, 2));
 
