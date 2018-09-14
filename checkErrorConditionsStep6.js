@@ -65,13 +65,13 @@ class ArrayParser {
 
   checkIfColon(valueOfStr) {
     let isColon = false;
-    if(valueOfStr === ":") isColon = true;
+    if (valueOfStr === ":") isColon = true;
     return isColon;
   }
 
   checkIfElseStrings(valueOfStr) {
     let isElseStrings = false;
-    if(valueOfStr !== ":") isElseStrings = true;
+    if (valueOfStr !== ":") isElseStrings = true;
     return isElseStrings;
   }
 
@@ -104,14 +104,27 @@ class ArrayParser {
 
   getColonError(stringData) {
     stringData.forEach((element, index) => {
-      if (element === "{") this.getColonErrorMsg(stringData, index);
+      const nextIndex = index + 1;
+      if (this.checkIfOpenCurlyBracket(element)) this.getColonErrorMsg(stringData, nextIndex);
+      else if (this.getIsColon(element)) this.getErrorMsgThatNeedVal(stringData, nextIndex);
     });
   }
 
-  getColonErrorMsg(stringData, index) {
-    const nextIndex = index + 1;
-    if (!(/:/.test(stringData[nextIndex]))) {
+  getIsColon(value) {
+    let isColon = false;
+    if (/:/.test(value)) isColon = true;
+    return isColon;
+  }
+
+  getColonErrorMsg(stringData, nextIndex) {
+    if (!this.getIsColon(stringData[nextIndex])) {
       throw new Error(`':'이 누락된 객체표현이 있습니다.`);
+    }
+  }
+
+  getErrorMsgThatNeedVal(stringData, nextIndex) {
+    if (!stringData[nextIndex]) {
+      throw new Error(`value 값이 누락되었습니다.`);
     }
   }
 
@@ -140,8 +153,6 @@ class ArrayParser {
   }
 
   getLastChildArr(lastChildArr, valOfSplitStrData) {
-    let findColon = /:/;
-
     if (this.checkIfOpenSquareBracket(valOfSplitStrData)) {
       const newArrTypeObj = new dataSampleClass({ type: "array", value: "arrayObj" });
       this.getlastArrChildStack(lastChildArr, newArrTypeObj);
@@ -153,18 +164,18 @@ class ArrayParser {
     else if (this.checkIfCloseBrackets(valOfSplitStrData)) {
       this.lastChildArrStack.pop();
     }
-    else if (findColon.test(valOfSplitStrData)) {
-      valOfSplitStrData = valOfSplitStrData.replace(findColon, "")
+    else if (this.getIsColon(valOfSplitStrData)) {
+      valOfSplitStrData = valOfSplitStrData.replace(/:/, "")
       const newKeyTypeObj = new dataSampleClass({ type: "string", key: valOfSplitStrData });
       this.getlastArrChildStack(lastChildArr, newKeyTypeObj);
     }
     else {
+      this.getStrTypeError(valOfSplitStrData);
       const newStrTypeObj = new dataSampleClass({ type: "string", value: valOfSplitStrData });
       lastChildArr.push(newStrTypeObj);
-      this.checkStrTypeError(valOfSplitStrData);
     }
 
-    const lastIdx = this.lastChildArrStack.indexOf([...this.lastChildArrStack].pop())
+    const lastIdx = this.lastChildArrStack.indexOf([...this.lastChildArrStack].pop());
     lastChildArr = this.lastChildArrStack[lastIdx];
     return lastChildArr;
   }
@@ -175,13 +186,25 @@ class ArrayParser {
     this.lastChildArrStack.push(lastChildArr[lastIdx]["child"]);
   }
 
-  checkStrTypeError(currentVal) {
-    const countQuotes = (currentVal.match(/'/g)).length;
-    const unKnownType = currentVal.match(/\d{1}[a-z]{1}/gi);
-
-    if (countQuotes > 2) throw Error(`${currentVal}는 올바른 문자열이 아닙니다.`);
-    else if (unKnownType) throw Error(`${currentVal}는 알 수 없는 타입입니다.`);
+  getStrTypeError(stringData) {
+    if (/'/g.test(stringData)) this.checkUnmatchQoutesCount(stringData)
+    this.checkUnKnownTypeError(stringData);
   }
+
+  checkUnmatchQoutesCount(currentVal) {
+    const numQuotes = (currentVal.match(/'/g)).length;
+    if (numQuotes % 2 !== 0) {
+      throw Error(`${currentVal}는 올바른 문자열이 아닙니다.`);
+    }
+  }
+
+  checkUnKnownTypeError(currentVal) {
+    const unKnownType = currentVal.match(/\d{1}[a-z]{1}/gi);
+    if (unKnownType) {
+      throw Error(`${currentVal}는 알 수 없는 타입입니다.`);
+    }
+  }
+
 }
 
 class dataSampleClass {
@@ -203,10 +226,10 @@ const testcase5 = "[123,[22,23,[11,112],55],33]";
 const testcase6 = "['1a3',[null,false,['11',[112233],112],55,99],33, true]";
 const testcase7 = "['1'a'3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 const testcase8 = "['13',{a: 'str'},2]";
-const testcase9 = "[{a:'b'}]";
+const testcase9 = "[{a:'b}]";
 const testcase10 = "[{newkeys: [1,2,3,4,5]]}";
-const testcase11 = "[{[}]]";
-const testcase12 = "['1a3',[null,false,['11',112,'99' , {a:'str', b:[912,[5656,33]]}, true]";
-const testcase13 = "['1a3',[null,false,['11',112,'99' , {{a:'str', b:[912,[5656,33]]}, true]]]";
+const testcase11 = "[{a:}]";
+const testcase12 = "['1a3',[null,false],['11',112,'99'], {a:'str', b:c}, true]";
+const testcase13 = "['13',[null,false,['11',112,'99' , {a:'str', b:c}, true]]]";
 
-console.log(JSON.stringify(parseStr.getArrayParser(testcase13), null, 2));
+console.log(JSON.stringify(parseStr.getArrayParser(testcase4), null, 2));
