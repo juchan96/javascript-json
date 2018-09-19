@@ -1,131 +1,24 @@
 class ArrayParser {
-  constructor() {
+  constructor(testcase) {
+    this.lastChildArrStack = [];
     this.item = {
       type: "array",
       child: []
     };
-    this.lastChildArrStack = [];
+    this.tokenizeString = new TokneizeStringData(testcase);
+    this.checkStringTokenError = new checkStrTokenError(this.tokenizeString);
+    this.stringDataToken = this.tokenizeString.splitSpringData;
+    this.checkIfOpenSquareBracket = this.tokenizeString.checkIfOpenSquareBracket;
+    this.checkIfOpenCurlyBracket = this.tokenizeString.checkIfOpenCurlyBracket;
+    this.checkIfCloseSquareBracket = this.tokenizeString.checkIfCloseSquareBracket;
+    this.checkIfCloseCurlyBracket = this.tokenizeString.checkIfCloseCurlyBracket;
+    this.checkIfColon = this.tokenizeString.checkIfColon;
   }
 
   getArrayParser(str) {
-    const trimBlank = this.getTrimBlank(str);
-    const stringData = this.splitStringData(trimBlank);
-    const bracketError = this.checkBracketError(stringData);
-    const colonError = this.getColonError(stringData);
-    const parseData = this.getParseData(stringData);
+    const parseData = this.getParseData(this.stringDataToken);
+    this.checkStringTokenError.getCheckTokenError();
     return parseData;
-  }
-
-  getTrimBlank(str) {
-    return str.split(' ').join("");
-  }
-
-  splitStringData(str) {
-    let strToken = "";
-
-    for (let value of str) {
-      if (this.checkIfOpenSquareBracket(value)) {
-        strToken += value + ",";
-      }
-      else if (this.checkIfOpenCurlyBracket(value)) {
-        strToken += value + ",";
-      }
-      else if (this.checkIfCloseBrackets(value)) {
-        strToken += "," + value;
-      }
-      else if (this.checkIfColon(value)) {
-        strToken += value + ","
-      }
-      else if (this.checkIfElseStrings(value)) {
-        strToken += value;
-      }
-    }
-    const result = strToken.split(",");
-    console.log(result);
-    return result;
-  }
-
-  checkIfOpenSquareBracket(valueOfStr) {
-    let isOpenSquareBracket = false;
-    if (valueOfStr === "[") isOpenSquareBracket = true;
-    return isOpenSquareBracket;
-  }
-
-  checkIfOpenCurlyBracket(valueOfStr) {
-    let isOpenCurlyBracket = false;
-    if (valueOfStr === "{") isOpenCurlyBracket = true;
-    return isOpenCurlyBracket;
-  }
-
-  checkIfCloseBrackets(valueOfStr) {
-    let isCloseBracket = false;
-    if (valueOfStr === "]" || valueOfStr === "}") isCloseBracket = true;
-    return isCloseBracket;
-  }
-
-  checkIfColon(valueOfStr) {
-    let isColon = false;
-    if (valueOfStr === ":") isColon = true;
-    return isColon;
-  }
-
-  checkIfElseStrings(valueOfStr) {
-    let isElseStrings = false;
-    if (valueOfStr !== ":") isElseStrings = true;
-    return isElseStrings;
-  }
-
-  checkBracketError(stringData) {
-    const bracketsCountObj = {
-      numSquareBracket: 0,
-      numCurlyBracket: 0,
-    }
-    this.getBracketCount.call(bracketsCountObj, stringData);
-    this.throwBracketErrorMsg.call(bracketsCountObj);
-  }
-
-  getBracketCount(stringData) {
-    stringData.forEach((element, index) => {
-      if (element === "[") this.numSquareBracket++;
-      else if ((element === "]")) this.numSquareBracket--;
-      else if ((element === "{")) this.numCurlyBracket++;
-      else if ((element === "}")) this.numCurlyBracket--;
-    });
-  }
-
-  throwBracketErrorMsg() {
-    if (this.numSquareBracket !== 0) {
-      throw new Error(`정상적으로 종료되지 않은 배열이 있습니다.`);
-    }
-    else if (this.numCurlyBracket !== 0) {
-      throw new Error(`정상적으로 종료되지 않은 객체가 있습니다.`);
-    }
-  }
-
-  getColonError(stringData) {
-    stringData.forEach((element, index) => {
-      const nextIndex = index + 1;
-      if (this.checkIfOpenCurlyBracket(element)) this.getColonErrorMsg(stringData, nextIndex);
-      else if (this.getIsColon(element)) this.getErrorMsgThatNeedVal(stringData, nextIndex);
-    });
-  }
-
-  getIsColon(value) {
-    let isColon = false;
-    if (/:/.test(value)) isColon = true;
-    return isColon;
-  }
-
-  getColonErrorMsg(stringData, nextIndex) {
-    if (!this.getIsColon(stringData[nextIndex])) {
-      throw new Error(`':'이 누락된 객체표현이 있습니다.`);
-    }
-  }
-
-  getErrorMsgThatNeedVal(stringData, nextIndex) {
-    if (!stringData[nextIndex]) {
-      throw new Error(`value 값이 누락되었습니다.`);
-    }
   }
 
   getParseData(splitStringData) {
@@ -161,10 +54,10 @@ class ArrayParser {
       const newObjTypeObj = new dataSampleClass({ type: "object" });
       this.getlastArrChildStack(lastChildArr, newObjTypeObj);
     }
-    else if (this.checkIfCloseBrackets(valOfSplitStrData)) {
+    else if (this.checkIfCloseSquareBracket(valOfSplitStrData) || this.checkIfCloseCurlyBracket(valOfSplitStrData)) {
       this.lastChildArrStack.pop();
     }
-    else if (this.getIsColon(valOfSplitStrData)) {
+    else if (this.checkIfColon(valOfSplitStrData)) {
       valOfSplitStrData = valOfSplitStrData.replace(/:/, "")
       const newKeyTypeObj = new dataSampleClass({ type: "string", key: valOfSplitStrData });
       this.getlastArrChildStack(lastChildArr, newKeyTypeObj);
@@ -204,7 +97,147 @@ class ArrayParser {
       throw Error(`${currentVal}는 알 수 없는 타입입니다.`);
     }
   }
+}
 
+class TokneizeStringData {
+  constructor(stringData) {
+    this.trimBlank = this.getTrimBlank(stringData)
+    this.splitSpringData = this.splitSpringData(this.trimBlank)
+  }
+
+  getTrimBlank(stringData) {
+    return stringData.split(' ').join("");
+  }
+
+  splitSpringData(str) {
+    let strToken = "";
+
+    for (let value of str) {
+      if (this.checkIfOpenSquareBracket(value)) {
+        strToken += value + ",";
+      }
+      else if (this.checkIfOpenCurlyBracket(value)) {
+        strToken += value + ",";
+      }
+      else if (this.checkIfCloseSquareBracket(value) || this.checkIfCloseCurlyBracket(value)) {
+        strToken += "," + value;
+      }
+      else if (this.checkIfColon(value)) {
+        strToken += value + ","
+      }
+      else if (this.checkIfElseStrings(value)) {
+        strToken += value;
+      }
+    }
+    const strTokenArr = strToken.split(",");
+    console.log(strTokenArr)
+    return strTokenArr;
+  }
+
+  checkIfOpenSquareBracket(valueOfStr) {
+    let isOpenSquareBracket = false;
+    if (valueOfStr === "[") isOpenSquareBracket = true;
+    return isOpenSquareBracket;
+  }
+
+  checkIfOpenCurlyBracket(valueOfStr) {
+    let isOpenCurlyBracket = false;
+    if (valueOfStr === "{") isOpenCurlyBracket = true;
+    return isOpenCurlyBracket;
+  }
+
+  checkIfCloseSquareBracket(valueOfStr) {
+    let isCloseBracket = false;
+    if (valueOfStr === "]") isCloseBracket = true;
+    return isCloseBracket;
+  }
+
+  checkIfCloseCurlyBracket(valueOfStr) {
+    let isCloseBracket = false;
+    if (valueOfStr === "}") isCloseBracket = true;
+    return isCloseBracket;
+  }
+
+  checkIfColon(valueOfStr) {
+    let isColon = false;
+    if (valueOfStr === ":") isColon = true;
+    return isColon;
+  }
+
+  checkIfElseStrings(valueOfStr) {
+    let isElseStrings = false;
+    if (valueOfStr !== ":") isElseStrings = true;
+    return isElseStrings;
+  }
+}
+
+
+class checkStrTokenError {
+  constructor(tokenizeString) {
+    this.numSquareBracket = 0;
+    this.numCurlyBracket = 0;
+    this.stringData = tokenizeString.splitSpringData;
+    this.checkIfOpenSquareBracket = tokenizeString.checkIfOpenSquareBracket;
+    this.checkIfOpenCurlyBracket = tokenizeString.checkIfOpenCurlyBracket;
+    this.checkIfCloseSquareBracket = tokenizeString.checkIfCloseSquareBracket;
+    this.checkIfCloseCurlyBracket = tokenizeString.checkIfCloseCurlyBracket;
+    this.checkIfColon = tokenizeString.checkIfColon;
+  }
+
+  getCheckTokenError() {
+    this.checkBracketError(this.stringData);
+    this.getColonError(this.stringData);
+  }
+
+  checkBracketError(stringData) {
+    this.getBracketCount(stringData);
+    this.throwBracketErrorMsg();
+  }
+
+  getBracketCount(stringData) {
+
+    stringData.forEach((element, index) => {
+      if (this.checkIfOpenSquareBracket(element)) this.numSquareBracket++;
+      else if (this.checkIfCloseSquareBracket(element)) this.numSquareBracket--;
+      else if (this.checkIfOpenCurlyBracket(element)) this.numCurlyBracket++;
+      else if (this.checkIfCloseCurlyBracket(element)) this.numCurlyBracket--;
+    });
+  }
+
+  throwBracketErrorMsg() {
+    if (this.numSquareBracket !== 0) {
+      throw new Error(`정상적으로 종료되지 않은 배열이 있습니다.`);
+    }
+    else if (this.numCurlyBracket !== 0) {
+      throw new Error(`정상적으로 종료되지 않은 객체가 있습니다.`);
+    }
+  }
+
+  getColonError(stringData) {
+    stringData.forEach((element, index) => {
+      const nextIndex = index + 1;
+      if (this.checkIfOpenCurlyBracket(element)) this.getColonErrorMsg(stringData, nextIndex);
+      else if (this.getIsColon(element)) this.getErrorMsgThatNeedVal(stringData, nextIndex);
+    });
+  }
+
+  getIsColon(value) {
+    let isColon = false;
+    if (/:/.test(value)) isColon = true;
+    return isColon;
+  }
+
+  getColonErrorMsg(stringData, nextIndex) {
+    if (!this.getIsColon(stringData[nextIndex])) {
+      throw new Error(`':'이 누락된 객체표현이 있습니다.`);
+    }
+  }
+
+  getErrorMsgThatNeedVal(stringData, nextIndex) {
+    if (!stringData[nextIndex]) {
+      throw new Error(`value 값이 누락되었습니다.`);
+    }
+  }
 }
 
 class dataSampleClass {
@@ -216,7 +249,6 @@ class dataSampleClass {
   }
 }
 
-const parseStr = new ArrayParser();
 const testcase = "[1,[2,[3],4],5]";
 const testcase1 = "[1,[2]]";
 const testcase2 = "['1',[         2]]";
@@ -232,4 +264,6 @@ const testcase11 = "[{a:}]";
 const testcase12 = "['1a3',[null,false],['11',112,'99'], {a:'str', b:c}, true]";
 const testcase13 = "['13',[null,false,['11',112,'99' , {a:'str', b:c}, true]]]";
 
-console.log(JSON.stringify(parseStr.getArrayParser(testcase4), null, 2));
+const parseStr = new ArrayParser(testcase);
+
+console.log(JSON.stringify(parseStr.getArrayParser(), null, 2));
