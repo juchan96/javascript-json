@@ -1,24 +1,54 @@
+const strTypeChecker = {
+  checkIfOpenSquareBracket(valueOfStr) {
+    let isOpenSquareBracket = false;
+    if (valueOfStr === "[") isOpenSquareBracket = true;
+    return isOpenSquareBracket;
+  },
+
+  checkIfOpenCurlyBracket(valueOfStr) {
+    let isOpenCurlyBracket = false;
+    if (valueOfStr === "{") isOpenCurlyBracket = true;
+    return isOpenCurlyBracket;
+  },
+
+  checkIfCloseSquareBracket(valueOfStr) {
+    let isCloseBracket = false;
+    if (valueOfStr === "]") isCloseBracket = true;
+    return isCloseBracket;
+  },
+
+  checkIfCloseCurlyBracket(valueOfStr) {
+    let isCloseBracket = false;
+    if (valueOfStr === "}") isCloseBracket = true;
+    return isCloseBracket;
+  },
+
+  checkIfColon(valueOfStr) {
+    let isColon = false;
+    if (valueOfStr === ":") isColon = true;
+    return isColon;
+  },
+
+  checkIfElseStrings(valueOfStr) {
+    let isElseStrings = false;
+    if (valueOfStr !== ":") isElseStrings = true;
+    return isElseStrings;
+  }
+}
+
 class ArrayParser {
-  constructor(testcase) {
+  constructor(tokenizedStrArr) {
     this.lastChildArrStack = [];
     this.item = {
       type: "array",
       child: []
     };
-    this.tokenizeString = new TokneizeStringData(testcase);
-    this.checkStringTokenError = new checkStrTokenError(this.tokenizeString);
-    this.stringDataToken = this.tokenizeString.splitSpringData;
-    this.checkIfOpenSquareBracket = this.tokenizeString.checkIfOpenSquareBracket;
-    this.checkIfOpenCurlyBracket = this.tokenizeString.checkIfOpenCurlyBracket;
-    this.checkIfCloseSquareBracket = this.tokenizeString.checkIfCloseSquareBracket;
-    this.checkIfCloseCurlyBracket = this.tokenizeString.checkIfCloseCurlyBracket;
-    this.checkIfColon = this.tokenizeString.checkIfColon;
+    this.tokenizedStrArr = tokenizedStrArr;
   }
 
   getArrayParser(str) {
-    const parseData = this.getParseData(this.stringDataToken);
-    this.checkStringTokenError.getCheckTokenError();
-    return parseData;
+    const parsedData = this.getParseData(this.tokenizedStrArr);
+    return parsedData;
   }
 
   getParseData(splitStringData) {
@@ -46,18 +76,18 @@ class ArrayParser {
   }
 
   getLastChildArr(lastChildArr, valOfSplitStrData) {
-    if (this.checkIfOpenSquareBracket(valOfSplitStrData)) {
+    if (strTypeChecker.checkIfOpenSquareBracket(valOfSplitStrData)) {
       const newArrTypeObj = new dataSampleClass({ type: "array", value: "arrayObj" });
       this.getlastArrChildStack(lastChildArr, newArrTypeObj);
     }
-    else if (this.checkIfOpenCurlyBracket(valOfSplitStrData)) {
+    else if (strTypeChecker.checkIfOpenCurlyBracket(valOfSplitStrData)) {
       const newObjTypeObj = new dataSampleClass({ type: "object" });
       this.getlastArrChildStack(lastChildArr, newObjTypeObj);
     }
-    else if (this.checkIfCloseSquareBracket(valOfSplitStrData) || this.checkIfCloseCurlyBracket(valOfSplitStrData)) {
+    else if (strTypeChecker.checkIfCloseSquareBracket(valOfSplitStrData) || strTypeChecker.checkIfCloseCurlyBracket(valOfSplitStrData)) {
       this.lastChildArrStack.pop();
     }
-    else if (this.checkIfColon(valOfSplitStrData)) {
+    else if (strTypeChecker.checkIfColon(valOfSplitStrData)) {
       valOfSplitStrData = valOfSplitStrData.replace(/:/, "")
       const newKeyTypeObj = new dataSampleClass({ type: "string", key: valOfSplitStrData });
       this.getlastArrChildStack(lastChildArr, newKeyTypeObj);
@@ -99,89 +129,52 @@ class ArrayParser {
   }
 }
 
-class TokneizeStringData {
+class StringDataTokenizer {
   constructor(stringData) {
-    this.trimBlank = this.getTrimBlank(stringData)
-    this.splitSpringData = this.splitSpringData(this.trimBlank)
+    this.stringData = stringData;
+  }
+
+  getTokenizedStrArr() {
+    const trimmedData = this.getTrimBlank(this.stringData)
+    const tokenizedStrArr = this.splitStringData(trimmedData)
+    return tokenizedStrArr;
   }
 
   getTrimBlank(stringData) {
     return stringData.split(' ').join("");
   }
 
-  splitSpringData(str) {
+  splitStringData(str) {
     let strToken = "";
 
     for (let value of str) {
-      if (this.checkIfOpenSquareBracket(value)) {
+      if (strTypeChecker.checkIfOpenSquareBracket(value)) {
         strToken += value + ",";
       }
-      else if (this.checkIfOpenCurlyBracket(value)) {
+      else if (strTypeChecker.checkIfOpenCurlyBracket(value)) {
         strToken += value + ",";
       }
-      else if (this.checkIfCloseSquareBracket(value) || this.checkIfCloseCurlyBracket(value)) {
+      else if (strTypeChecker.checkIfCloseSquareBracket(value) || strTypeChecker.checkIfCloseCurlyBracket(value)) {
         strToken += "," + value;
       }
-      else if (this.checkIfColon(value)) {
+      else if (strTypeChecker.checkIfColon(value)) {
         strToken += value + ","
       }
-      else if (this.checkIfElseStrings(value)) {
+      else if (strTypeChecker.checkIfElseStrings(value)) {
         strToken += value;
       }
     }
-    const strTokenArr = strToken.split(",");
-    console.log(strTokenArr)
-    return strTokenArr;
-  }
-
-  checkIfOpenSquareBracket(valueOfStr) {
-    let isOpenSquareBracket = false;
-    if (valueOfStr === "[") isOpenSquareBracket = true;
-    return isOpenSquareBracket;
-  }
-
-  checkIfOpenCurlyBracket(valueOfStr) {
-    let isOpenCurlyBracket = false;
-    if (valueOfStr === "{") isOpenCurlyBracket = true;
-    return isOpenCurlyBracket;
-  }
-
-  checkIfCloseSquareBracket(valueOfStr) {
-    let isCloseBracket = false;
-    if (valueOfStr === "]") isCloseBracket = true;
-    return isCloseBracket;
-  }
-
-  checkIfCloseCurlyBracket(valueOfStr) {
-    let isCloseBracket = false;
-    if (valueOfStr === "}") isCloseBracket = true;
-    return isCloseBracket;
-  }
-
-  checkIfColon(valueOfStr) {
-    let isColon = false;
-    if (valueOfStr === ":") isColon = true;
-    return isColon;
-  }
-
-  checkIfElseStrings(valueOfStr) {
-    let isElseStrings = false;
-    if (valueOfStr !== ":") isElseStrings = true;
-    return isElseStrings;
+    const tokenizedStrArr = strToken.split(",");
+    console.log(tokenizedStrArr)
+    return tokenizedStrArr;
   }
 }
 
-
-class checkStrTokenError {
+class StrTokenErrorChecker {
   constructor(tokenizeString) {
     this.numSquareBracket = 0;
     this.numCurlyBracket = 0;
-    this.stringData = tokenizeString.splitSpringData;
-    this.checkIfOpenSquareBracket = tokenizeString.checkIfOpenSquareBracket;
-    this.checkIfOpenCurlyBracket = tokenizeString.checkIfOpenCurlyBracket;
-    this.checkIfCloseSquareBracket = tokenizeString.checkIfCloseSquareBracket;
-    this.checkIfCloseCurlyBracket = tokenizeString.checkIfCloseCurlyBracket;
-    this.checkIfColon = tokenizeString.checkIfColon;
+    this.stringData = tokenizeString.splitStringData;
   }
 
   getCheckTokenError() {
@@ -195,12 +188,11 @@ class checkStrTokenError {
   }
 
   getBracketCount(stringData) {
-
     stringData.forEach((element, index) => {
-      if (this.checkIfOpenSquareBracket(element)) this.numSquareBracket++;
-      else if (this.checkIfCloseSquareBracket(element)) this.numSquareBracket--;
-      else if (this.checkIfOpenCurlyBracket(element)) this.numCurlyBracket++;
-      else if (this.checkIfCloseCurlyBracket(element)) this.numCurlyBracket--;
+      if (strTypeChecker.checkIfOpenSquareBracket(element)) this.numSquareBracket++;
+      else if (strTypeChecker.checkIfCloseSquareBracket(element)) this.numSquareBracket--;
+      else if (strTypeChecker.checkIfOpenCurlyBracket(element)) this.numCurlyBracket++;
+      else if (strTypeChecker.checkIfCloseCurlyBracket(element)) this.numCurlyBracket--;
     });
   }
 
@@ -216,7 +208,7 @@ class checkStrTokenError {
   getColonError(stringData) {
     stringData.forEach((element, index) => {
       const nextIndex = index + 1;
-      if (this.checkIfOpenCurlyBracket(element)) this.getColonErrorMsg(stringData, nextIndex);
+      if (strTypeChecker.checkIfOpenCurlyBracket(element)) this.getColonErrorMsg(stringData, nextIndex);
       else if (this.getIsColon(element)) this.getErrorMsgThatNeedVal(stringData, nextIndex);
     });
   }
@@ -264,6 +256,9 @@ const testcase11 = "[{a:}]";
 const testcase12 = "['1a3',[null,false],['11',112,'99'], {a:'str', b:c}, true]";
 const testcase13 = "['13',[null,false,['11',112,'99' , {a:'str', b:c}, true]]]";
 
-const parseStr = new ArrayParser(testcase);
+
+const tokenizedStrArr = new StringDataTokenizer(testcase);
+const strTokenErrorChecker = new StrTokenErrorChecker(tokenizedStrArr)
+const parseStr = new ArrayParser(tokenizedStrArr.getTokenizedStrArr());
 
 console.log(JSON.stringify(parseStr.getArrayParser(), null, 2));
