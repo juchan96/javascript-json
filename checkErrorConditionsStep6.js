@@ -1,39 +1,11 @@
-const strTypeChecker = {
-  checkIfOpenSquareBracket(valueOfStr) {
-    let isOpenSquareBracket = false;
-    if (valueOfStr === "[") isOpenSquareBracket = true;
-    return isOpenSquareBracket;
-  },
-
-  checkIfOpenCurlyBracket(valueOfStr) {
-    let isOpenCurlyBracket = false;
-    if (valueOfStr === "{") isOpenCurlyBracket = true;
-    return isOpenCurlyBracket;
-  },
-
-  checkIfCloseSquareBracket(valueOfStr) {
-    let isCloseBracket = false;
-    if (valueOfStr === "]") isCloseBracket = true;
-    return isCloseBracket;
-  },
-
-  checkIfCloseCurlyBracket(valueOfStr) {
-    let isCloseBracket = false;
-    if (valueOfStr === "}") isCloseBracket = true;
-    return isCloseBracket;
-  },
-
-  checkIfColon(valueOfStr) {
-    let isColon = false;
-    if (valueOfStr === ":") isColon = true;
-    return isColon;
-  },
-
-  checkIfElseStrings(valueOfStr) {
-    let isElseStrings = false;
-    if (valueOfStr !== ":") isElseStrings = true;
-    return isElseStrings;
-  }
+const typeChecker = {
+  isOpenSquareBracket: (valueOfStr) => valueOfStr === "[" ? true : false,
+  isOpenCurlyBracket: (valueOfStr) => valueOfStr === "{" ? true : false,
+  isCloseSquareBracket: (valueOfStr) => valueOfStr === "]" ? true : false,
+  isCloseCurlyBracket: (valueOfStr) => valueOfStr === "}" ? true : false,
+  isCloseBrackets: (valOfSplitStrData) => (typeChecker.isCloseSquareBracket(valOfSplitStrData) || typeChecker.isCloseCurlyBracket(valOfSplitStrData)) ? true : false,
+  isColon: (valueOfStr) => valueOfStr === ":" ? true : false,
+  isElseStrings: (valueOfStr) => valueOfStr !== ":" ? true : false
 }
 
 class ArrayParser {
@@ -76,18 +48,18 @@ class ArrayParser {
   }
 
   getLastChildArr(lastChildArr, valOfSplitStrData) {
-    if (strTypeChecker.checkIfOpenSquareBracket(valOfSplitStrData)) {
+    if (typeChecker.isOpenSquareBracket(valOfSplitStrData)) {
       const newArrTypeObj = new dataSampleClass({ type: "array", value: "arrayObj" });
       this.getlastArrChildStack(lastChildArr, newArrTypeObj);
     }
-    else if (strTypeChecker.checkIfOpenCurlyBracket(valOfSplitStrData)) {
+    else if (typeChecker.isOpenCurlyBracket(valOfSplitStrData)) {
       const newObjTypeObj = new dataSampleClass({ type: "object" });
       this.getlastArrChildStack(lastChildArr, newObjTypeObj);
     }
-    else if (strTypeChecker.checkIfCloseSquareBracket(valOfSplitStrData) || strTypeChecker.checkIfCloseCurlyBracket(valOfSplitStrData)) {
+    else if (typeChecker.isCloseBrackets(valOfSplitStrData)) {
       this.lastChildArrStack.pop();
     }
-    else if (strTypeChecker.checkIfColon(valOfSplitStrData)) {
+    else if (typeChecker.isColon(valOfSplitStrData)) {
       valOfSplitStrData = valOfSplitStrData.replace(/:/, "")
       const newKeyTypeObj = new dataSampleClass({ type: "string", key: valOfSplitStrData });
       this.getlastArrChildStack(lastChildArr, newKeyTypeObj);
@@ -148,19 +120,19 @@ class StringDataTokenizer {
     let strToken = "";
 
     for (let value of str) {
-      if (strTypeChecker.checkIfOpenSquareBracket(value)) {
+      if (typeChecker.isOpenSquareBracket(value)) {
         strToken += value + ",";
       }
-      else if (strTypeChecker.checkIfOpenCurlyBracket(value)) {
+      else if (typeChecker.isOpenCurlyBracket(value)) {
         strToken += value + ",";
       }
-      else if (strTypeChecker.checkIfCloseSquareBracket(value) || strTypeChecker.checkIfCloseCurlyBracket(value)) {
+      else if (typeChecker.isCloseBrackets(value)) {
         strToken += "," + value;
       }
-      else if (strTypeChecker.checkIfColon(value)) {
+      else if (typeChecker.isColon(value)) {
         strToken += value + ","
       }
-      else if (strTypeChecker.checkIfElseStrings(value)) {
+      else if (typeChecker.isElseStrings(value)) {
         strToken += value;
       }
     }
@@ -170,11 +142,11 @@ class StringDataTokenizer {
   }
 }
 
-class StrTokenErrorChecker {
+class TokenErrorChecker {
   constructor(tokenizeString) {
     this.numSquareBracket = 0;
     this.numCurlyBracket = 0;
-    this.stringData = tokenizeString.splitStringData;
+    this.stringData = tokenizeString;
   }
 
   getCheckTokenError() {
@@ -189,10 +161,10 @@ class StrTokenErrorChecker {
 
   getBracketCount(stringData) {
     stringData.forEach((element, index) => {
-      if (strTypeChecker.checkIfOpenSquareBracket(element)) this.numSquareBracket++;
-      else if (strTypeChecker.checkIfCloseSquareBracket(element)) this.numSquareBracket--;
-      else if (strTypeChecker.checkIfOpenCurlyBracket(element)) this.numCurlyBracket++;
-      else if (strTypeChecker.checkIfCloseCurlyBracket(element)) this.numCurlyBracket--;
+      if (typeChecker.isOpenSquareBracket(element)) this.numSquareBracket++;
+      else if (typeChecker.isCloseSquareBracket(element)) this.numSquareBracket--;
+      else if (typeChecker.isOpenCurlyBracket(element)) this.numCurlyBracket++;
+      else if (typeChecker.isCloseCurlyBracket(element)) this.numCurlyBracket--;
     });
   }
 
@@ -208,7 +180,7 @@ class StrTokenErrorChecker {
   getColonError(stringData) {
     stringData.forEach((element, index) => {
       const nextIndex = index + 1;
-      if (strTypeChecker.checkIfOpenCurlyBracket(element)) this.getColonErrorMsg(stringData, nextIndex);
+      if (typeChecker.isOpenCurlyBracket(element)) this.getColonErrorMsg(stringData, nextIndex);
       else if (this.getIsColon(element)) this.getErrorMsgThatNeedVal(stringData, nextIndex);
     });
   }
@@ -252,13 +224,14 @@ const testcase7 = "['1'a'3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}
 const testcase8 = "['13',{a: 'str'},2]";
 const testcase9 = "[{a:'b}]";
 const testcase10 = "[{newkeys: [1,2,3,4,5]]}";
-const testcase11 = "[{a:}]";
+const testcase11 = "[{a:]";
 const testcase12 = "['1a3',[null,false],['11',112,'99'], {a:'str', b:c}, true]";
 const testcase13 = "['13',[null,false,['11',112,'99' , {a:'str', b:c}, true]]]";
 
 
 const tokenizedStrArr = new StringDataTokenizer(testcase);
-const strTokenErrorChecker = new StrTokenErrorChecker(tokenizedStrArr)
+const tokenErrorChecker = new TokenErrorChecker(tokenizedStrArr.getTokenizedStrArr());
 const parseStr = new ArrayParser(tokenizedStrArr.getTokenizedStrArr());
 
+tokenErrorChecker.getCheckTokenError();
 console.log(JSON.stringify(parseStr.getArrayParser(), null, 2));
