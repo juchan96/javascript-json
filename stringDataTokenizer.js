@@ -32,7 +32,6 @@ class StringDataTokenizer {
       }
     }
     const tokenizedStrArr = strToken.split(",");
-    console.log(tokenizedStrArr)
     return tokenizedStrArr;
   }
 }

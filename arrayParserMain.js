@@ -28,21 +28,21 @@ class ArrayParser {
           value: value
         });
         lastChildArr.push(newNumBooleanObj);
-      } 
+      }
       else if (value === "false" || value === "true") {
         const newNumBooleanObj = new dataSampleClass({
           type: "boolean",
           value: value
         });
         lastChildArr.push(newNumBooleanObj);
-      } 
+      }
       else if (!isNaN(value) && value !== "") {
         const newNumTypeObj = new dataSampleClass({
           type: "number",
           value: value
         });
         lastChildArr.push(newNumTypeObj);
-      } 
+      }
       else if (value !== "") {
         lastChildArr = this.getLastChildArr(lastChildArr, value);
       }
@@ -104,14 +104,14 @@ class ArrayParser {
   checkUnmatchQoutesCount(currentVal) {
     const numQuotes = (currentVal.match(/'/g)).length;
     if (numQuotes % 2 !== 0) {
-      throw Error(`${currentVal}는 올바른 문자열이 아닙니다.`);
+      throw `${currentVal}는 올바른 문자열이 아닙니다.`;
     }
   }
 
   checkUnKnownTypeError(currentVal) {
     const unKnownType = currentVal.match(/\d{1}[a-z]{1}/gi);
     if (unKnownType) {
-      throw Error(`${currentVal}는 알 수 없는 타입입니다.`);
+      throw `${currentVal}는 알 수 없는 타입입니다.`;
     }
   }
 }

@@ -105,13 +105,8 @@ class ArrayParser {
   checkError(currentVal) {
     const countQuotes = (currentVal.match(/'/g)).length;
     const unKnownType = currentVal.match(/\d{1}[a-z]{1}/gi);
-    try {
-      if (countQuotes > 2) throw Error(`${currentVal}는 올바른 문자열이 아닙니다.`);
-      else if (unKnownType) throw Error(`${currentVal}는 알 수 없는 타입입니다.`);
-    }
-    catch (errorMsg) {
-      console.log(errorMsg)
-    }
+    if (countQuotes > 2) throw Error(`${currentVal}는 올바른 문자열이 아닙니다.`);
+    else if (unKnownType) throw Error(`${currentVal}는 알 수 없는 타입입니다.`);
   }
 }
 // 토큰별로 나눈 string의 type과 value를 입력해주는 함수
@@ -124,14 +119,16 @@ class dataSampleClass {
   }
 }
 
+
 const parseStr = new ArrayParser();
-const testcase = "[1,[2,[3],4],5]";
+const testcase = "[''1',[2,[3],4],5]";
 const testcase1 = "[1,[2]]";
 const testcase2 = "['1',[         2]]";
 const testcase3 = "[1,[2,[[3,4,[10,12],60],9]],7,8]";
 const testcase4 = "[[[[[    ]]]]";
 const testcase5 = "[123,[22,23,[11,112],55],33]";
-const testcase6 = "['1a3',[null,false,['11',[112233],112],55,99],33, true]";
+const testcase6 = "[1,[null,false,['11',[112233],112],55,99],33, true]";
 const testcase7 = "['1'a'3',[null,false,['11',[112233],{easy : ['hello', {a:'a'}, 'world']},112],55, '99'],{a:'str', b:[912,[5656,33],{key : 'innervalue', newkeys: [1,2,3,4,5]}]}, true]";
 const testcase8 = "[{a:'b'c'}]";
-console.log(JSON.stringify(parseStr.getArrayParser(testcase7), null, 2));
+
+console.log(JSON.stringify(parseStr.getArrayParser(testcase), null, 2));
