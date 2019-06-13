@@ -1,4 +1,6 @@
-- javscript로 array형태의 데이터를 parsing하는 기능입니다.
+# Array Parser
+
+javscript로 array형태의 데이터를 parsing하는 기능입니다.
 
 - 저장소 링크: https://github.com/juchanhwang/javascript-json/tree/step7
 - 기술 스택: JavaScript
